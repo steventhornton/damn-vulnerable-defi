@@ -27,3 +27,9 @@ Since the `flashLoan` allows for calling any function, the `approve` function ca
 
 ### Side Entrance
 This challenge can be solved by taking a flash loan from the pool and depositing the loan back into the pool using the `deposit` function. This gives the contract that made the flashloan the ability to later withdraw this ETH. The flashloan will succeed as the ETH balance of the flashloan pool will be the same.
+
+### The Rewarder
+
+### Selfie
+A governance proposal can be created in a flash loan that would call the `drainAllFunds` function (from the governance contract) that would transfer all funds to the attacker.
+
